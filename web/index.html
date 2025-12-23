@@ -1,32 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>My AI Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeetAi</title>
+
+<link rel="icon" type="image/png" href="favicon.png">
+
 <style>
-body{font-family:Arial;background:#f4f4f4}
-#chat{width:600px;height:400px;overflow:auto;border:1px solid #ccc;background:#fff;padding:10px}
-#q{width:500px}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:#f5f7fb;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  background:#ffffff;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+
+.header{
+  padding:14px;
+  text-align:center;
+  font-weight:600;
+  font-size:18px;
+  color:#1f2937;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.chat{
+  flex:1;
+  padding:12px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  max-width:85%;
+  padding:10px 14px;
+  border-radius:14px;
+  line-height:1.4;
+  font-size:15px;
+}
+
+.user{
+  align-self:flex-end;
+  background:#2563eb;
+  color:white;
+  border-bottom-right-radius:4px;
+}
+
+.ai{
+  align-self:flex-start;
+  background:#f1f5f9;
+  color:#111827;
+  border-bottom-left-radius:4px;
+}
+
+.input-bar{
+  display:flex;
+  padding:10px;
+  gap:8px;
+  border-top:1px solid #e5e7eb;
+}
+
+input{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-size:15px;
+}
+
+button{
+  padding:0 18px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(0.97);
+}
+
+@media (min-width:768px){
+  .app{
+    height:600px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  }
+}
 </style>
 </head>
+
 <body>
 
-<h2>My AI Chat</h2>
-<div id="chat"></div><br>
+<div class="app">
+  <div class="header">MeetAi</div>
 
-<input id="q" placeholder="Ask something...">
-<button onclick="send()">Send</button>
+  <div class="chat" id="chat"></div>
+
+  <div class="input-bar">
+    <input id="q" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
 
 <script>
+const chat=document.getElementById("chat")
+
+function addMsg(text,type){
+  const div=document.createElement("div")
+  div.className="msg "+type
+  div.innerText=text
+  chat.appendChild(div)
+  chat.scrollTop=chat.scrollHeight
+  return div
+}
+
+function addTyping(){
+  const div=document.createElement("div")
+  div.className="msg ai"
+  div.id="typing"
+  div.innerText="MeetAi is typing..."
+  chat.appendChild(div)
+  chat.scrollTop=chat.scrollHeight
+}
+
+function removeTyping(){
+  const t=document.getElementById("typing")
+  if(t) t.remove()
+}
+
 function send(){
-let q=document.getElementById("q").value
-document.getElementById("chat").innerHTML+="<b>You:</b> "+q+"<br>"
-fetch("https://ai-deploy-vxyv.onrender.com/ask?q="+encodeURIComponent(q))
-.then(r=>r.json())
-.then(d=>{
-document.getElementById("chat").innerHTML+="<b>AI:</b> "+d.reply+"<br><br>"
-})
-document.getElementById("q").value=""
+  const q=document.getElementById("q")
+  const text=q.value.trim()
+  if(!text) return
+
+  addMsg(text,"user")
+  q.value=""
+
+  addTyping()
+
+  fetch("https://ai-deploy-vxyv.onrender.com/ask?q="+encodeURIComponent(text))
+    .then(r=>r.json())
+    .then(d=>{
+      removeTyping()
+      addMsg(d.reply,"ai")
+    })
+    .catch(()=>{
+      removeTyping()
+      addMsg("Connection error","ai")
+    })
 }
 </script>
 
