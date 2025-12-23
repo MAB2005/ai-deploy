@@ -1,0 +1,7 @@
+<!DOCTYPE html><html><body>
+<input id=q><button onclick=ask()>Send</button><pre id=r></pre>
+<script>
+function ask(){
+fetch("/ask?q="+q.value).then(x=>x.json()).then(d=>r.innerText+=d.reply+"\n\n")
+}
+</script></body></html>
